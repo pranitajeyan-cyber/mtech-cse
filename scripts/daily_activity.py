@@ -32,10 +32,7 @@ ACTIVITY_TYPES = [
     "Learned {topic} fundamentals",
 ]
 
-FILES = [
-    "AGENTS.md", "config.py", "ingest.py", "rag_engine.py",
-    "app.py", "README.md", "tools/notes.md",
-]
+FILES = []  # Reserved for future use
 
 
 def pick_activities():
@@ -89,18 +86,18 @@ def main():
     main_file = create_main_log(activities)
     snippets = create_snippets(activities)
 
-    total = 1 + len(snippets)
+    # Commit main log
+    subprocess.run(["git", "add", main_file])
+    subprocess.run(["git", "commit", "-m", f"docs: daily log {DATE}"])
 
-    for path in [main_file] + snippets:
+    # Commit each snippet with its activity as message
+    for i, path in enumerate(snippets):
         subprocess.run(["git", "add", path])
-        name = os.path.basename(path)
-        msg = f"docs: {name.replace('.md','').replace(DATE,'').strip('-')}"
-        if not msg or msg == "docs: ":
-            msg = f"docs: daily log {DATE}"
-        subprocess.run(["git", "commit", "-m", msg])
+        activity_short = activities[i][:60]
+        subprocess.run(["git", "commit", "-m", f"docs: {activity_short}"])
 
     subprocess.run(["git", "push"])
-    print(f"✅ Created {total} commits for {DATE}")
+    print(f"✅ Created {1 + len(snippets)} commits for {DATE}")
 
 
 if __name__ == "__main__":
