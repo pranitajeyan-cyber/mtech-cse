@@ -1,0 +1,38 @@
+name: Daily Activity Log
+
+on:
+  schedule:
+    - cron: '30 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create daily activity file
+        run: |
+          mkdir -p activity
+          DATE=$(date +%Y-%m-%d)
+          FILE="activity/$DATE.md"
+          if [ ! -f "$FILE" ]; then
+            echo "# Activity Log - $DATE" > "$FILE"
+            echo "" >> "$FILE"
+            echo "## Today" >> "$FILE"
+            echo "- " >> "$FILE"
+            echo "" >> "$FILE"
+            echo "---" >> "$FILE"
+            echo "_Automated daily log_ " >> "$FILE"
+          fi
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "pranitajeyan-cyber@users.noreply.github.com"
+          git config --local user.name "pranitajeyan-cyber"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: daily activity log $(date +%Y-%m-%d)"
+          git push
